@@ -64,7 +64,7 @@ jobs:
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
-          name: tv_${{ steps.version.outputs.version }}
+          name: mytv_${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
           body: init
           draft: false
