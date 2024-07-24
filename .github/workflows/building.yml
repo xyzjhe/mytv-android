@@ -37,7 +37,7 @@ jobs:
 
       - name: 获取版本号
         id: version
-        run: echo "version=$(date -d "8 hour" -u +3.%y.%m%d%H)" >> $GITHUB_OUTPUT
+        run: echo "version=$(date -d "8 hour" -u +%y.%m%d%H)" >> $GITHUB_OUTPUT
 
       - name: 重命名应用
         run: |
