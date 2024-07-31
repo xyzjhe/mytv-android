@@ -24,5 +24,5 @@ rootProject.name = "我的电视"
 include(":core:data")
 include(":core:util")
 include(":core:designsystem")
-include(":tv")
+//include(":tv")
 include(":mobile")
