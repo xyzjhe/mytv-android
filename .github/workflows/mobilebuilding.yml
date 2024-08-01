@@ -1,4 +1,4 @@
-name: building
+name: mobilebuilding
 
 on:
 #  push:
