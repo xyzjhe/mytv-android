@@ -25,6 +25,18 @@ object Constants {
     val IPTV_SOURCE_LIST = IptvSourceList(
         listOf(
             IptvSource(
+                name = "默认直播源 wokaotianshi123（IPV4组播）",
+                url = "https://mirror.ghproxy.com/https://raw.githubusercontent.com/wokaotianshi123/zubotv/main/sichuanzubo.m3u",
+            ),
+            IptvSource(
+                name = "默认直播源 Guovin（IPV4）",
+                url = "https://mirror.ghproxy.com/https://raw.githubusercontent.com/Guovin/TV/gd/result.txt",
+            ),
+            IptvSource(
+                name = "默认直播源 xiongjian83（IPV4）",
+                url = "https://mirror.ghproxy.com/https://raw.githubusercontent.com/xiongjian83/TvBox/main/live.txt",
+            ),
+            IptvSource(
                 name = "默认直播源 fanmingming（IPV6）",
                 url = "https://mirror.ghproxy.com/https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u",
             ),
