@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import top.yogiczy.mytv.core.data.entities.channel.Channel
+import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList.Companion.recentProgramme
 import top.yogiczy.mytv.core.data.entities.epg.EpgProgramme
@@ -43,11 +44,12 @@ fun QuickOpScreen(
     currentChannelNumberProvider: () -> String = { "" },
     epgListProvider: () -> EpgList = { EpgList() },
     isInTimeShiftProvider: () -> Boolean = { false },
-    playbackEpgProgrammeProvider: () -> EpgProgramme? = { null },
+    currentPlaybackEpgProgrammeProvider: () -> EpgProgramme? = { null },
     videoPlayerMetadataProvider: () -> VideoPlayer.Metadata = { VideoPlayer.Metadata() },
     videoPlayerAspectRatioProvider: () -> Float = { 16f / 9f },
     onShowEpg: () -> Unit = {},
     onShowChannelUrl: () -> Unit = {},
+    onShowVideoPlayerController: () -> Unit = {},
     onClearCache: () -> Unit = {},
     onChangeVideoPlayerAspectRatio: (Float) -> Unit = {},
     onShowMoreSettings: () -> Unit = {},
@@ -73,11 +75,12 @@ fun QuickOpScreen(
             currentChannelUrlIdxProvider = currentChannelUrlIdxProvider,
             epgListProvider = epgListProvider,
             isInTimeShiftProvider = isInTimeShiftProvider,
-            playbackEpgProgrammeProvider = playbackEpgProgrammeProvider,
+            currentPlaybackEpgProgrammeProvider = currentPlaybackEpgProgrammeProvider,
             videoPlayerMetadataProvider = videoPlayerMetadataProvider,
             videoPlayerAspectRatioProvider = videoPlayerAspectRatioProvider,
             onShowEpg = onShowEpg,
             onShowChannelUrl = onShowChannelUrl,
+            onShowVideoPlayerController = onShowVideoPlayerController,
             onClearCache = onClearCache,
             onChangeVideoPlayerAspectRatio = onChangeVideoPlayerAspectRatio,
             onShowMoreSettings = onShowMoreSettings,
@@ -125,11 +128,12 @@ private fun QuickOpScreenBottom(
     currentChannelUrlIdxProvider: () -> Int = { 0 },
     epgListProvider: () -> EpgList = { EpgList() },
     isInTimeShiftProvider: () -> Boolean = { false },
-    playbackEpgProgrammeProvider: () -> EpgProgramme? = { null },
+    currentPlaybackEpgProgrammeProvider: () -> EpgProgramme? = { null },
     videoPlayerMetadataProvider: () -> VideoPlayer.Metadata = { VideoPlayer.Metadata() },
     videoPlayerAspectRatioProvider: () -> Float = { 16f / 9f },
     onShowEpg: () -> Unit = {},
     onShowChannelUrl: () -> Unit = {},
+    onShowVideoPlayerController: () -> Unit = {},
     onClearCache: () -> Unit = {},
     onChangeVideoPlayerAspectRatio: (Float) -> Unit = {},
     onShowMoreSettings: () -> Unit = {},
@@ -145,18 +149,18 @@ private fun QuickOpScreenBottom(
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             ChannelInfo(
-                modifier = Modifier.padding(start = childPadding.start),
+                modifier = Modifier.padding(start = childPadding.start, end = childPadding.end),
                 channelProvider = currentChannelProvider,
                 channelUrlIdxProvider = currentChannelUrlIdxProvider,
                 recentEpgProgrammeProvider = {
                     epgListProvider().recentProgramme(currentChannelProvider())
                 },
                 isInTimeShiftProvider = isInTimeShiftProvider,
-                playbackEpgProgrammeProvider = playbackEpgProgrammeProvider,
+                currentPlaybackEpgProgrammeProvider = currentPlaybackEpgProgrammeProvider,
             )
 
             ChannelPlayerInfo(
-                modifier = Modifier.padding(start = childPadding.start),
+                modifier = Modifier.padding(start = childPadding.start, end = childPadding.end),
                 resolutionProvider = {
                     val metadata = videoPlayerMetadataProvider()
                     metadata.videoWidth to metadata.videoHeight
@@ -166,6 +170,7 @@ private fun QuickOpScreenBottom(
             QuickOpBtnList(
                 onShowEpg = onShowEpg,
                 onShowChannelUrl = onShowChannelUrl,
+                onShowVideoPlayerController = onShowVideoPlayerController,
                 onClearCache = onClearCache,
                 videoPlayerAspectRatioProvider = videoPlayerAspectRatioProvider,
                 onChangeVideoPlayerAspectRatio = onChangeVideoPlayerAspectRatio,
@@ -184,6 +189,9 @@ private fun QuickOpScreenPreview() {
             QuickOpScreen(
                 currentChannelProvider = { Channel.EXAMPLE },
                 currentChannelNumberProvider = { "1" },
+                epgListProvider = {
+                    EpgList.example(ChannelList(listOf(Channel.EXAMPLE)))
+                },
             )
         }
     }

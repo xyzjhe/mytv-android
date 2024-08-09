@@ -94,6 +94,7 @@ class Media3VideoPlayer(
             contentTypeAttempts[contentType ?: Util.inferContentType(uri)] = true
             videoPlayer.setMediaSource(mediaSource)
             videoPlayer.prepare()
+            videoPlayer.play()
             triggerPrepared()
         }
         updatePositionJob?.cancel()
@@ -149,7 +150,7 @@ class Media3VideoPlayer(
                 updatePositionJob?.cancel()
                 updatePositionJob = coroutineScope.launch {
                     while (true) {
-                        triggerCurrentPosition(videoPlayer.currentPosition)
+                        triggerCurrentPosition(System.currentTimeMillis() - videoPlayer.currentLiveOffset)
                         delay(1000)
                     }
                 }
@@ -158,6 +159,10 @@ class Media3VideoPlayer(
             if (playbackState != Player.STATE_BUFFERING) {
                 triggerBuffering(false)
             }
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            triggerIsPlayingChanged(isPlaying)
         }
     }
 
@@ -241,6 +246,10 @@ class Media3VideoPlayer(
 
     override fun pause() {
         videoPlayer.pause()
+    }
+
+    override fun seekTo(position: Long) {
+        videoPlayer.seekTo(position)
     }
 
     override fun stop() {

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,7 +55,7 @@ fun ChannelScreen(
     epgListProvider: () -> EpgList = { EpgList() },
     showEpgProgrammeProgressProvider: () -> Boolean = { false },
     isInTimeShiftProvider: () -> Boolean = { false },
-    playbackEpgProgrammeProvider: () -> EpgProgramme? = { null },
+    currentPlaybackEpgProgrammeProvider: () -> EpgProgramme? = { null },
     videoPlayerMetadataProvider: () -> VideoPlayer.Metadata = { VideoPlayer.Metadata() },
     channelFavoriteEnabledProvider: () -> Boolean = { false },
     channelFavoriteListProvider: () -> ImmutableList<String> = { persistentListOf() },
@@ -90,7 +89,7 @@ fun ChannelScreen(
             epgListProvider = epgListProvider,
             showEpgProgrammeProgressProvider = showEpgProgrammeProgressProvider,
             isInTimeShiftProvider = isInTimeShiftProvider,
-            playbackEpgProgrammeProvider = playbackEpgProgrammeProvider,
+            currentPlaybackEpgProgrammeProvider = currentPlaybackEpgProgrammeProvider,
             videoPlayerMetadataProvider = videoPlayerMetadataProvider,
             channelFavoriteEnabledProvider = channelFavoriteEnabledProvider,
             channelFavoriteListProvider = channelFavoriteListProvider,
@@ -122,7 +121,7 @@ private fun ChannelScreenTopRight(
             Box(modifier = Modifier.padding(horizontal = 8.dp)) {
                 Spacer(
                     modifier = Modifier
-                        .background(Color.White)
+                        .background(MaterialTheme.colorScheme.onSurface)
                         .width(2.dp)
                         .height(30.dp),
                 )
@@ -145,7 +144,7 @@ private fun ChannelScreenBottom(
     epgListProvider: () -> EpgList = { EpgList() },
     showEpgProgrammeProgressProvider: () -> Boolean = { false },
     isInTimeShiftProvider: () -> Boolean = { false },
-    playbackEpgProgrammeProvider: () -> EpgProgramme? = { null },
+    currentPlaybackEpgProgrammeProvider: () -> EpgProgramme? = { null },
     videoPlayerMetadataProvider: () -> VideoPlayer.Metadata = { VideoPlayer.Metadata() },
     channelFavoriteEnabledProvider: () -> Boolean = { false },
     channelFavoriteListProvider: () -> ImmutableList<String> = { persistentListOf() },
@@ -161,18 +160,18 @@ private fun ChannelScreenBottom(
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             ChannelInfo(
-                modifier = Modifier.padding(start = childPadding.start),
+                modifier = Modifier.padding(start = childPadding.start, end = childPadding.end),
                 channelProvider = currentChannelProvider,
                 channelUrlIdxProvider = currentChannelUrlIdxProvider,
                 recentEpgProgrammeProvider = {
                     epgListProvider().recentProgramme(currentChannelProvider())
                 },
                 isInTimeShiftProvider = isInTimeShiftProvider,
-                playbackEpgProgrammeProvider = playbackEpgProgrammeProvider,
+                currentPlaybackEpgProgrammeProvider = currentPlaybackEpgProgrammeProvider,
             )
 
             ChannelPlayerInfo(
-                modifier = Modifier.padding(start = childPadding.start),
+                modifier = Modifier.padding(start = childPadding.start, end = childPadding.end),
                 resolutionProvider = {
                     val metadata = videoPlayerMetadataProvider()
                     metadata.videoWidth to metadata.videoHeight

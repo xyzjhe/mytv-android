@@ -16,7 +16,7 @@ import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
 import top.yogiczy.mytv.core.data.repositories.epg.EpgRepository
 import top.yogiczy.mytv.tv.ui.material.LocalPopupManager
 import top.yogiczy.mytv.tv.ui.material.SimplePopup
-import top.yogiczy.mytv.tv.ui.screens.epgsource.EpgSourceRefreshTimeScreen
+import top.yogiczy.mytv.tv.ui.screens.components.SelectDialog
 import top.yogiczy.mytv.tv.ui.screens.epgsource.EpgSourceScreen
 import top.yogiczy.mytv.tv.ui.screens.settings.SettingsViewModel
 import top.yogiczy.mytv.tv.ui.utils.Configs
@@ -31,6 +31,7 @@ fun SettingsCategoryEpg(
     SettingsContentList(modifier) {
         item {
             SettingsListItem(
+                modifier = Modifier.focusRequester(it),
                 headlineContent = "节目单启用",
                 supportingContent = "首次加载时可能会较为缓慢",
                 trailingContent = {
@@ -59,19 +60,18 @@ fun SettingsCategoryEpg(
                 remoteConfig = true,
             )
 
-            SimplePopup(
+            SelectDialog(
                 visibleProvider = { visible },
                 onDismissRequest = { visible = false },
-            ) {
-                EpgSourceRefreshTimeScreen(
-                    currentRefreshHourProvider = { settingsViewModel.epgRefreshTimeThreshold },
-                    onRefreshHourSelected = {
-                        settingsViewModel.epgRefreshTimeThreshold = it
-                        visible = false
-                    },
-                    onClose = { visible = false },
-                )
-            }
+                title = "节目单刷新时间阈值",
+                currentDataProvider = { settingsViewModel.epgRefreshTimeThreshold },
+                dataListProvider = { (0..<13).toList() },
+                dataText = { "${it}:00" },
+                onDataSelected = {
+                    settingsViewModel.epgRefreshTimeThreshold = it
+                    visible = false
+                },
+            )
         }
 
         item {

@@ -36,7 +36,7 @@ fun ChannelTempScreen(
     recentEpgProgrammeProvider: () -> EpgProgrammeRecent? = { null },
     showEpgProgrammeProgressProvider: () -> Boolean = { false },
     isInTimeShiftProvider: () -> Boolean = { false },
-    playbackEpgProgrammeProvider: () -> EpgProgramme? = { null },
+    currentPlaybackEpgProgrammeProvider: () -> EpgProgramme? = { null },
 ) {
     val childPadding = rememberChildPadding()
 
@@ -63,19 +63,21 @@ fun ChannelTempScreen(
                     channelUrlIdxProvider = channelUrlIdxProvider,
                     recentEpgProgrammeProvider = recentEpgProgrammeProvider,
                     isInTimeShiftProvider = isInTimeShiftProvider,
-                    playbackEpgProgrammeProvider = playbackEpgProgrammeProvider,
+                    currentPlaybackEpgProgrammeProvider = currentPlaybackEpgProgrammeProvider,
                 )
 
-                recentEpgProgrammeProvider()?.now?.let { nowProgramme ->
-                    if (showEpgProgrammeProgressProvider()) {
-                        Box(
-                            modifier = Modifier
-                                .layoutId("progress")
-                                .align(Alignment.BottomStart)
-                                .fillMaxWidth(nowProgramme.progress())
-                                .height(3.dp)
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)),
-                        )
+                if (currentPlaybackEpgProgrammeProvider() == null) {
+                    recentEpgProgrammeProvider()?.now?.let { nowProgramme ->
+                        if (showEpgProgrammeProgressProvider()) {
+                            Box(
+                                modifier = Modifier
+                                    .layoutId("progress")
+                                    .align(Alignment.BottomStart)
+                                    .fillMaxWidth(nowProgramme.progress())
+                                    .height(3.dp)
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)),
+                            )
+                        }
                     }
                 }
             },
@@ -108,7 +110,7 @@ private fun ChannelTempScreenPreview() {
     MyTVTheme {
         PreviewWithLayoutGrids {
             ChannelTempScreen(
-                channelProvider = { Channel.EXAMPLE },
+                channelProvider = { Channel.EXAMPLE.copy(name = "长标题".repeat(4)) },
                 channelUrlIdxProvider = { 0 },
                 channelNumberProvider = { 8 },
                 recentEpgProgrammeProvider = { EpgProgrammeRecent.EXAMPLE },

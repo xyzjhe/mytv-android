@@ -28,6 +28,7 @@ fun SettingsCategoryUI(
     SettingsContentList(modifier) {
         item {
             SettingsListItem(
+                modifier = Modifier.focusRequester(it),
                 headlineContent = "节目进度",
                 supportingContent = "在频道项底部显示当前节目进度条",
                 trailingContent = {
@@ -39,6 +40,23 @@ fun SettingsCategoryUI(
                 onSelected = {
                     settingsViewModel.uiShowEpgProgrammeProgress =
                         !settingsViewModel.uiShowEpgProgrammeProgress
+                },
+            )
+        }
+
+        item {
+            SettingsListItem(
+                headlineContent = "常驻底部节目进度",
+                supportingContent = "在播放器底部显示当前节目进度条",
+                trailingContent = {
+                    Switch(
+                        checked = settingsViewModel.uiShowEpgProgrammePermanentProgress,
+                        onCheckedChange = null
+                    )
+                },
+                onSelected = {
+                    settingsViewModel.uiShowEpgProgrammePermanentProgress =
+                        !settingsViewModel.uiShowEpgProgrammePermanentProgress
                 },
             )
         }

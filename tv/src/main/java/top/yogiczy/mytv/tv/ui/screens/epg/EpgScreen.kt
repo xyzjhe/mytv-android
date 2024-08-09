@@ -34,6 +34,8 @@ fun EpgScreen(
     modifier: Modifier = Modifier,
     epgProvider: () -> Epg = { Epg() },
     epgProgrammeReserveListProvider: () -> EpgProgrammeReserveList = { EpgProgrammeReserveList() },
+    supportPlaybackProvider: () -> Boolean = { false },
+    currentPlaybackEpgProgrammeProvider: () -> EpgProgramme? = { null },
     onEpgProgrammePlayback: (EpgProgramme) -> Unit = {},
     onEpgProgrammeReserve: (EpgProgramme) -> Unit = {},
     onClose: () -> Unit = {},
@@ -58,6 +60,8 @@ fun EpgScreen(
                     EpgProgrammeList(programDayGroup.getOrElse(currentDay) { emptyList() })
                 },
                 epgProgrammeReserveListProvider = epgProgrammeReserveListProvider,
+                supportPlaybackProvider = supportPlaybackProvider,
+                currentPlaybackProvider = currentPlaybackEpgProgrammeProvider,
                 onPlayback = onEpgProgrammePlayback,
                 onReserve = onEpgProgrammeReserve,
                 onUserAction = { screenAutoCloseState.active() },

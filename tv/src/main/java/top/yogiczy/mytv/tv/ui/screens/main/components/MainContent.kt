@@ -20,7 +20,6 @@ import top.yogiczy.mytv.core.data.repositories.iptv.IptvRepository
 import top.yogiczy.mytv.core.data.utils.ChannelUtil
 import top.yogiczy.mytv.tv.ui.material.PopupContent
 import top.yogiczy.mytv.tv.ui.material.Snackbar
-import top.yogiczy.mytv.tv.ui.material.SnackbarType
 import top.yogiczy.mytv.tv.ui.material.Visible
 import top.yogiczy.mytv.tv.ui.material.popupable
 import top.yogiczy.mytv.tv.ui.screens.channel.ChannelNumberSelectScreen
@@ -30,6 +29,7 @@ import top.yogiczy.mytv.tv.ui.screens.channel.rememberChannelNumberSelectState
 import top.yogiczy.mytv.tv.ui.screens.channelurl.ChannelUrlScreen
 import top.yogiczy.mytv.tv.ui.screens.classicchannel.ClassicChannelScreen
 import top.yogiczy.mytv.tv.ui.screens.datetime.DatetimeScreen
+import top.yogiczy.mytv.tv.ui.screens.epg.EpgProgrammeProgressScreen
 import top.yogiczy.mytv.tv.ui.screens.epg.EpgScreen
 import top.yogiczy.mytv.tv.ui.screens.epgreverse.EpgReverseScreen
 import top.yogiczy.mytv.tv.ui.screens.monitor.MonitorScreen
@@ -39,6 +39,7 @@ import top.yogiczy.mytv.tv.ui.screens.settings.SettingsViewModel
 import top.yogiczy.mytv.tv.ui.screens.update.UpdateScreen
 import top.yogiczy.mytv.tv.ui.screens.videoplayer.VideoPlayerScreen
 import top.yogiczy.mytv.tv.ui.screens.videoplayer.rememberVideoPlayerState
+import top.yogiczy.mytv.tv.ui.screens.videoplayercontroller.VideoPlayerControllerScreen
 import top.yogiczy.mytv.tv.ui.screens.webview.WebViewScreen
 import top.yogiczy.mytv.tv.ui.utils.Configs
 import top.yogiczy.mytv.tv.ui.utils.captureBackKey
@@ -114,6 +115,7 @@ fun MainContent(
                 onSettings = { mainContentState.isQuickOpScreenVisible = true },
                 onLongLeft = { mainContentState.isEpgScreenVisible = true },
                 onLongRight = { mainContentState.isChannelUrlScreenVisible = true },
+                onLongDown = { mainContentState.isVideoPlayerControllerScreenVisible = true },
                 onNumber = { channelNumberSelectState.input(it) },
             )
             .handleDragGestures(
@@ -162,6 +164,16 @@ fun MainContent(
         }
     }
 
+    Visible({ settingsViewModel.uiShowEpgProgrammePermanentProgress }) {
+        EpgProgrammeProgressScreen(
+            currentEpgProgrammeProvider = {
+                mainContentState.currentPlaybackEpgProgramme
+                    ?: epgListProvider().recentProgramme(mainContentState.currentChannel)?.now
+            },
+            videoPlayerCurrentPositionProvider = { videoPlayerState.currentPosition },
+        )
+    }
+
     Visible({
         !mainContentState.isTempChannelScreenVisible
                 && !mainContentState.isChannelScreenVisible
@@ -193,6 +205,7 @@ fun MainContent(
                 epgListProvider().recentProgramme(mainContentState.currentChannel)
             },
             showEpgProgrammeProgressProvider = { settingsViewModel.uiShowEpgProgrammeProgress },
+            currentPlaybackEpgProgrammeProvider = { mainContentState.currentPlaybackEpgProgramme },
         )
     }
 
@@ -210,8 +223,15 @@ fun MainContent(
                     it.channel == mainContentState.currentChannel.name
                 })
             },
+            supportPlaybackProvider = { mainContentState.supportPlayback() },
+            currentPlaybackEpgProgrammeProvider = { mainContentState.currentPlaybackEpgProgramme },
             onEpgProgrammePlayback = {
-                Snackbar.show("该功能未实现", type = SnackbarType.ERROR)
+                mainContentState.isEpgScreenVisible = false
+                mainContentState.changeCurrentChannel(
+                    mainContentState.currentChannel,
+                    mainContentState.currentChannelUrlIdx,
+                    it,
+                )
             },
             onEpgProgrammeReserve = { programme ->
                 mainContentState.reverseEpgProgrammeOrNot(
@@ -242,6 +262,32 @@ fun MainContent(
     }
 
     PopupContent(
+        visibleProvider = { mainContentState.isVideoPlayerControllerScreenVisible },
+        onDismissRequest = { mainContentState.isVideoPlayerControllerScreenVisible = false },
+    ) {
+        VideoPlayerControllerScreen(
+            isVideoPlayerPlayingProvider = { videoPlayerState.isPlaying },
+            isVideoPlayerBufferingProvider = { videoPlayerState.isBuffering },
+            videoPlayerCurrentPositionProvider = { videoPlayerState.currentPosition },
+            videoPlayerDurationProvider = {
+                val playback = mainContentState.currentPlaybackEpgProgramme
+
+                if (playback != null) {
+                    playback.startAt to playback.endAt
+                } else {
+                    val programme =
+                        epgListProvider().recentProgramme(mainContentState.currentChannel)?.now
+                    (programme?.startAt ?: 0L) to (programme?.endAt ?: 0L)
+                }
+            },
+            onVideoPlayerPlay = { videoPlayerState.play() },
+            onVideoPlayerPause = { videoPlayerState.pause() },
+            onVideoPlayerSeekTo = { videoPlayerState.seekTo(it) },
+            onClose = { mainContentState.isVideoPlayerControllerScreenVisible = false },
+        )
+    }
+
+    PopupContent(
         visibleProvider = { mainContentState.isQuickOpScreenVisible },
         onDismissRequest = { mainContentState.isQuickOpScreenVisible = false },
     ) {
@@ -252,6 +298,7 @@ fun MainContent(
                 (filteredChannelGroupListProvider().channelList.indexOf(mainContentState.currentChannel) + 1).toString()
             },
             epgListProvider = epgListProvider,
+            currentPlaybackEpgProgrammeProvider = { mainContentState.currentPlaybackEpgProgramme },
             videoPlayerMetadataProvider = { videoPlayerState.metadata },
             videoPlayerAspectRatioProvider = { videoPlayerState.aspectRatio },
             onShowEpg = {
@@ -261,6 +308,10 @@ fun MainContent(
             onShowChannelUrl = {
                 mainContentState.isQuickOpScreenVisible = false
                 mainContentState.isChannelUrlScreenVisible = true
+            },
+            onShowVideoPlayerController = {
+                mainContentState.isQuickOpScreenVisible = false
+                mainContentState.isVideoPlayerControllerScreenVisible = true
             },
             onClearCache = {
                 settingsViewModel.iptvPlayableHostList = emptySet()
@@ -295,6 +346,7 @@ fun MainContent(
             onChannelFavoriteToggle = { mainContentState.favoriteChannelOrNot(it) },
             epgListProvider = epgListProvider,
             showEpgProgrammeProgressProvider = { settingsViewModel.uiShowEpgProgrammeProgress },
+            currentPlaybackEpgProgrammeProvider = { mainContentState.currentPlaybackEpgProgramme },
             videoPlayerMetadataProvider = { videoPlayerState.metadata },
             channelFavoriteEnabledProvider = { settingsViewModel.iptvChannelFavoriteEnable },
             channelFavoriteListProvider = { settingsViewModel.iptvChannelFavoriteList.toImmutableList() },
@@ -325,8 +377,11 @@ fun MainContent(
                 EpgProgrammeReserveList(settingsViewModel.epgChannelReserveList)
             },
             showEpgProgrammeProgressProvider = { settingsViewModel.uiShowEpgProgrammeProgress },
-            onEpgProgrammePlayback = { _, _ ->
-                Snackbar.show("该功能未实现", type = SnackbarType.ERROR)
+            supportPlaybackProvider = { mainContentState.supportPlayback(it) },
+            currentPlaybackEpgProgrammeProvider = { mainContentState.currentPlaybackEpgProgramme },
+            onEpgProgrammePlayback = { channel, programme ->
+                mainContentState.isChannelScreenVisible = false
+                mainContentState.changeCurrentChannel(channel, null, programme)
             },
             onEpgProgrammeReserve = { channel, programme ->
                 mainContentState.reverseEpgProgrammeOrNot(channel, programme)
